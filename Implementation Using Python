@@ -1,0 +1,78 @@
+# importing libraries 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+#Reading the Dataset
+datas = pd.read_csv("MotorInsuranceFraud.csv")
+datas.head()
+
+#Checking Dataset
+datas.info()
+
+
+# Renaming the columns with larger names to smaller 
+datas = datas.rename(columns={'Insurance Type': 'IT', 'Income of Policy Holder': 'IPH', 'Marital Status': 'MS', 'Num Claimants': 'NUC', 'Injury Type': 'InT', 'Overnight Hospital Stay': 'OHS',
+'Claim Amount': 'CA','Total Claimed': 'TC','Num Claims': 'NC','Num Soft Tissue': 'NST','% Soft Tissue': 'PST','Claim Amount Received': 'CAR'})
+
+
+# Feature Selection 
+# Dropping unnecessary Features
+datas = datas.drop(columns = [
+    'ID', 
+    'Insurance Type ',
+    'MS'])
+    
+# Data Preprocessing 
+
+# Filling NaN values with mean
+datas['NST'].fillna(value=datas['NST'].mean(), inplace=True)
+
+# Dealing with categorical features
+from sklearn import preprocessing
+label_encoder = preprocessing.LabelEncoder()
+
+datas['InT']= label_encoder.fit_transform(datas['InT'])
+datas['OHS']= label_encoder.fit_transform(datas['OHS'])
+
+# Showing Final Dataset
+datas
+
+
+# Splitting Dataset
+X = datas.iloc[:, 0:-1]
+Y = datas.iloc[:, -1]
+X
+Y
+
+# Creating the training and testing data 
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size= 0.25,random_state = 65)
+
+
+from sklearn.preprocessing import StandardScaler
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.fit_transform(X_test)
+
+
+# Classifier Creation
+# Applying KNN Algorithm 
+from sklearn.neighbors import KNeighborsClassifier
+classifier = KNeighborsClassifier(n_neighbors = 5,metric = 'minkowski',p = 2)
+classifier.fit(X_train,Y_train)
+
+
+# Making Predictions
+Y_pred = classifier.predict(X_test)
+
+# creating confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(Y_test,Y_pred)
+cm
+
+
+
+#accuracy score
+classifier.score(X_test, Y_test)
